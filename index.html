@@ -182,7 +182,7 @@ table.standings .pos3,.standings .pos4{color:#ccc}
 </div>
 
 <div class="footer">
-  Dados via <a href="https://wcup2026.org" target="_blank">wcup2026.org</a> &bull; Copa do Mundo 2026 &bull; Atualizado a cada 30s
+  Dados via <a href="https://wcup2026.org" target="_blank">wcup2026.org</a> &bull; Copa do Mundo 2026 &bull; Dados em tempo real
 </div>
 
 <script>
@@ -211,32 +211,20 @@ function flag(url,size){
 function isLive(m){return m.status==='live'}
 function isFinished(m){return m.status==='finished'}
 function isUpcoming(m){return m.status==='upcoming'}
+function matchKey(m){return m.team1+'|'+m.team2}
+
+var _lastHighlightKey = '';
+var _allMatches = [];
 
 async function loadHighlight(){
-  const el=document.getElementById('wc_highlight');
   try{
     const d=await fetchAPI('all');
     const now=Math.floor(Date.now()/1000);
     const live=d.matches.filter(m=>isLive(m));
     const upc=d.matches.filter(m=>isUpcoming(m)&&m.datetime>=now).sort((a,b)=>a.datetime-b.datetime);
     const m=live.length>0?live[0]:(upc.length>0?upc[0]:null);
-    if(!m){el.innerHTML='<div class="loading">Nenhum jogo</div>';return}
-    const isL=isLive(m);
-    const sc=m.score?m.score[0]+' - '+m.score[1]:null;
-    const dt=fmtDateTime(m.datetime);
-    el.innerHTML='<div class="scoreboard'+(isL?' live':'')+'">'+
-      '<div class="scoreboard-label'+(isL?'':' next')+'">'+(isL?'Jogando Agora':'Proximo Jogo')+'</div>'+
-      '<div class="scoreboard-teams">'+
-        '<div class="scoreboard-team"><div>'+flag(m.flag1,56)+'</div><div class="scoreboard-team-name">'+m.team1+'</div></div>'+
-        '<div class="scoreboard-score'+(sc?'':' vs')+'">'+(sc||'vs')+'</div>'+
-        '<div class="scoreboard-team"><div>'+flag(m.flag2,56)+'</div><div class="scoreboard-team-name">'+m.team2+'</div></div>'+
-      '</div>'+
-      '<div class="scoreboard-info">'+
-        (m.ground?m.ground+' &bull; ':'')+
-        (isL&&m.live_minute?'<span class="scoreboard-time">'+m.live_minute+"'</span>":dt)+
-      '</div>'+
-    '</div>';
-  }catch(e){el.innerHTML='<div class="error">Erro ao carregar</div>'}
+    renderHighlight(m);
+  }catch(e){document.getElementById('wc_highlight').innerHTML='<div class="error">Erro ao carregar</div>'}
 }
 
 async function loadAoVivo(){
@@ -260,11 +248,11 @@ function renderMatches(matches){
     const sc=m.score?m.score[0]+' - '+m.score[1]:'vs';
     const cls=isLive(m)?'live':(isFinished(m)?'finished':'upcoming');
     const lbl=isLive(m)?'AO VIVO':(isFinished(m)?'Encerrado':fmtTime(m.datetime));
-    h+='<div class="match-row '+cls+'">'+
+    h+='<div class="match-row '+cls+'" data-mk="'+matchKey(m)+'">'+
       '<div class="match-team">'+flag(m.flag1)+m.team1+'</div>'+
-      '<div class="match-score">'+sc+'</div>'+
+      '<div class="match-score" data-score="'+matchKey(m)+'">'+sc+'</div>'+
       '<div class="match-team right">'+m.team2+flag(m.flag2)+'</div>'+
-      '<div class="match-status '+cls+'">'+lbl+'</div></div>';
+      '<div class="match-status '+cls+'" data-status="'+matchKey(m)+'">'+lbl+'</div></div>';
   }
   return '<div style="display:flex;flex-direction:column;gap:6px">'+h+'</div>';
 }
@@ -275,7 +263,7 @@ async function loadUpcoming(){
     const d=await fetchAPI('upcoming&limit=10');
     let h='';
     for(const m of d.matches){
-      h+='<div class="upcoming-row">'+
+      h+='<div class="upcoming-row" data-mk="'+matchKey(m)+'">'+
         '<span class="upcoming-time">'+fmtDateTime(m.datetime)+'</span>'+
         '<span class="upcoming-group">'+m.group.replace('Group ','')+'</span>'+
         '<span class="upcoming-teams right">'+flag(m.flag1)+' '+m.team1+'</span>'+
@@ -330,9 +318,9 @@ async function loadBracket(){
       h+='<div class="bracket-col"><div class="bracket-title">'+rn+'</div>';
       for(const m of rm){
         const sc=m.score?m.score[0]+'-'+m.score[1]:'?';
-        h+='<div class="bracket-match'+(isFinished(m)?' played':'')+'">'+
+        h+='<div class="bracket-match'+(isFinished(m)?' played':'')+'" data-mk="'+matchKey(m)+'">'+
           '<div style="font-size:10px;color:#888">'+m.team1+'</div>'+
-          '<div style="font-size:14px;font-weight:700;color:#FFD700;text-align:center">'+sc+'</div>'+
+          '<div style="font-size:14px;font-weight:700;color:#FFD700;text-align:center" data-score="'+matchKey(m)+'">'+sc+'</div>'+
           '<div style="font-size:10px;color:#888">'+m.team2+'</div>'+
           (m.ground?'<div style="font-size:9px;color:#666;text-align:center;margin-top:2px">'+m.ground+'</div>':'')+
         '</div>';
@@ -356,7 +344,7 @@ async function loadCalendar(){
       const rd=m.round.replace('Matchday ','R');
       h+='<tr><td style="white-space:nowrap">'+dt+'</td><td style="font-size:10px">'+rd+'</td><td style="font-size:10px">'+m.group.replace('Group ','')+'</td>'+
         '<td style="text-align:right;white-space:nowrap">'+flag(m.flag1,16)+m.team1+'</td>'+
-        '<td style="text-align:center;font-weight:700;color:'+col+'">'+sc+'</td>'+
+        '<td style="text-align:center;font-weight:700;color:'+col+'" data-score="'+matchKey(m)+'">'+sc+'</td>'+
         '<td style="white-space:nowrap">'+m.team2+flag(m.flag2,16)+'</td>'+
         '<td style="font-size:10px;color:#888">'+m.ground+'</td></tr>';
     }
@@ -387,7 +375,7 @@ async function loadRounds(){
         h+='<div class="upcoming-row"><span style="color:#888;min-width:50px;font-size:11px">'+dt+'</span>'+
           '<span style="color:#999;min-width:22px;font-size:10px">'+m.group.replace('Group ','')+'</span>'+
           '<span class="upcoming-teams right">'+flag(m.flag1,16)+m.team1+'</span>'+
-          '<span style="font-weight:700;color:'+col+';min-width:30px;text-align:center;padding:0 6px">'+sc+'</span>'+
+          '<span style="font-weight:700;color:'+col+';min-width:30px;text-align:center;padding:0 6px" data-score="'+matchKey(m)+'">'+sc+'</span>'+
           '<span class="upcoming-teams">'+m.team2+flag(m.flag2,16)+'</span></div>';
       }
     }
@@ -412,7 +400,7 @@ async function loadVenues(){
       h+='<div class="venue-card"><div class="venue-title">'+vn+'</div><div class="venue-count">'+vm.length+' jogos</div>';
       for(let mi=0;mi<vm.length&&mi<5;mi++){
         const m=vm[mi];const dt=fmtDate(m.datetime);
-        h+='<div class="venue-match"><span style="color:#888">'+dt+'</span> '+m.team1+' '+(m.score?m.score[0]+'-'+m.score[1]:'vs')+' '+m.team2+'</div>';
+        h+='<div class="venue-match" data-mk="'+matchKey(m)+'"><span style="color:#888">'+dt+'</span> '+m.team1+' <span data-score="'+matchKey(m)+'">'+(m.score?m.score[0]+'-'+m.score[1]:'vs')+'</span> '+m.team2+'</div>';
       }
       if(vm.length>5)h+='<div style="font-size:10px;color:#666">+ '+(vm.length-5)+' mais</div>';
       h+='</div>';
@@ -462,6 +450,7 @@ function animateCards(){
 }
 
 async function loadAll(){
+  _allMatches = [];
   await Promise.all([
     loadHighlight(),loadAoVivo(),loadUpcoming(),loadStandings(),
     loadResults(),loadBracket(),loadCalendar(),loadRounds(),
@@ -470,8 +459,117 @@ async function loadAll(){
   animateCards();
 }
 
-loadAll();
-setInterval(loadAll,1000);
+function updateScore(m,key){
+  key = key || matchKey(m);
+  var sc = m.score ? m.score[0]+' - '+m.score[1] : null;
+  if(!sc){sc='vs'}
+  var els = document.querySelectorAll('[data-score="'+key+'"]');
+  for(var i=0;i<els.length;i++){
+    if(els[i].textContent !== sc) els[i].textContent = sc;
+  }
+}
+
+function updateRowStatus(m,key){
+  key = key || matchKey(m);
+  var rows = document.querySelectorAll('[data-mk="'+key+'"]');
+  for(var i=0;i<rows.length;i++){
+    var old = rows[i].className;
+    var neu = 'match-row';
+    if(isLive(m)) neu+=' live';
+    else if(isFinished(m)) neu+=' finished';
+    else neu+=' upcoming';
+    if(rows[i].className.indexOf('match-row')>=0 && rows[i].className!==neu) rows[i].className=neu;
+  }
+  var stEls = document.querySelectorAll('[data-status="'+key+'"]');
+  for(var i=0;i<stEls.length;i++){
+    var lbl = isLive(m) ? (m.live_minute ? m.live_minute+"'" : 'AO VIVO') : (isFinished(m) ? 'Encerrado' : '');
+    if(stEls[i].textContent !== lbl) stEls[i].textContent = lbl;
+  }
+}
+
+function renderHighlight(m){
+  var el = document.getElementById('wc_highlight');
+  if(!m){el.innerHTML='<div class="loading">Nenhum jogo</div>';return}
+  var isL = isLive(m);
+  var sc = m.score ? m.score[0]+' - '+m.score[1] : null;
+  var d = new Date(m.datetime*1000);
+  var dt = d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',hour:'2-digit',minute:'2-digit'});
+  _lastHighlightKey = matchKey(m);
+  el.innerHTML='<div class="scoreboard'+(isL?' live':'')+'" data-hl="'+_lastHighlightKey+'">'+
+    '<div class="scoreboard-label'+(isL?'':' next')+'" data-hllabel="1">'+(isL?'Jogando Agora':'Proximo Jogo')+'</div>'+
+    '<div class="scoreboard-teams">'+
+      '<div class="scoreboard-team"><div>'+flag(m.flag1,56)+'</div><div class="scoreboard-team-name">'+m.team1+'</div></div>'+
+      '<div class="scoreboard-score'+(sc?'':' vs')+'" data-hlscore="1">'+(sc||'vs')+'</div>'+
+      '<div class="scoreboard-team"><div>'+flag(m.flag2,56)+'</div><div class="scoreboard-team-name">'+m.team2+'</div></div>'+
+    '</div>'+
+    '<div class="scoreboard-info" data-hlinfo="1">'+
+      (m.ground?m.ground+' &bull; ':'')+
+      (isL&&m.live_minute?'<span class="scoreboard-time" data-hltime="1">'+m.live_minute+"'</span>":dt)+
+    '</div>'+
+  '</div>';
+}
+
+function updateAllScores(){
+  var now = Math.floor(Date.now()/1000);
+  var live = _allMatches.filter(function(m){ return isLive(m); });
+  var upc = _allMatches.filter(function(m){ return isUpcoming(m) && m.datetime >= now; }).sort(function(a,b){ return a.datetime - b.datetime; });
+
+  for(var i=0;i<_allMatches.length;i++){
+    var m = _allMatches[i];
+    updateScore(m);
+    if(isLive(m) || isFinished(m)) updateRowStatus(m);
+  }
+
+  // Update "Ao Vivo" title
+  var titleEl = document.getElementById('wc_live_title');
+  if(titleEl){
+    var t = live.length > 0 ? 'Jogando Agora' : (_allMatches.some(function(x){ return x.datetime >= now-86400 && x.datetime <= now+86400; }) ? 'Jogos de Hoje' : 'Ultimos Jogos');
+    if(titleEl.textContent !== t) titleEl.textContent = t;
+  }
+
+  // Update highlight
+  var hl = document.querySelector('[data-hl]');
+  var best = live.length>0 ? live[0] : (upc.length>0 ? upc[0] : null);
+  if(!best){ if(hl) document.getElementById('wc_highlight').innerHTML='<div class="loading">Nenhum jogo</div>'; return; }
+  var bestKey = matchKey(best);
+  if(!hl || bestKey !== _lastHighlightKey){
+    renderHighlight(best);
+    return;
+  }
+  var scoreEl = document.querySelector('[data-hlscore]');
+  if(scoreEl){
+    var ns = best.score ? best.score[0]+' - '+best.score[1] : 'vs';
+    if(scoreEl.textContent !== ns) scoreEl.textContent = ns;
+  }
+  var labelEl = document.querySelector('[data-hllabel]');
+  if(labelEl){
+    var nl = isLive(best) ? 'Jogando Agora' : 'Proximo Jogo';
+    if(labelEl.textContent !== nl) labelEl.textContent = nl;
+  }
+  var infoEl = document.querySelector('[data-hlinfo]');
+  if(infoEl){
+    var d = new Date(best.datetime*1000);
+    var ds = d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',hour:'2-digit',minute:'2-digit'});
+    var html = (best.ground ? best.ground+' &bull; ' : '') + (isLive(best) && best.live_minute ? '<span class="scoreboard-time" data-hltime="1">'+best.live_minute+"'</span>" : ds);
+    if(infoEl.innerHTML !== html) infoEl.innerHTML = html;
+  }
+}
+
+var _updateTimer = null;
+
+async function init(){
+  await loadAll();
+  _allMatches = (await fetchAPI('all')).matches || [];
+  _updateTimer = setInterval(async function(){
+    try{
+      var d = await fetchAPI('all');
+      _allMatches = d.matches || [];
+      updateAllScores();
+    }catch(e){}
+  }, 1000);
+}
+
+init();
 </script>
 </body>
 </html>
