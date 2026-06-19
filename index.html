@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Copa do Mundo 2026</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1117;color:#ccc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:16px;max-width:1400px;margin:0 auto}
+h1{color:#FFD700;font-size:24px;margin-bottom:16px}
+.grid{display:grid;gap:12px;margin-bottom:12px}
+.row2{grid-template-columns:1fr 1fr}
+.row4{grid-template-columns:repeat(4,1fr)}
+.card{background:#0d1117;border-radius:8px;padding:16px;border:1px solid rgba(255,215,0,0.15)}
+.card-title{color:#FFD700;font-size:14px;font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+.header{background:linear-gradient(135deg,#001489 0%,#BF0A30 40%,#006847 100%);padding:24px 32px;border-radius:8px;text-align:center;position:relative;overflow:hidden;margin-bottom:12px}
+.header-2026{position:absolute;top:-20px;right:-20px;font-size:180px;font-weight:900;color:rgba(255,215,0,0.06);font-family:Impact,'Arial Black',sans-serif;letter-spacing:-8px;pointer-events:none}
+.header-sub{font-size:14px;color:rgba(255,215,0,0.8);text-transform:uppercase;letter-spacing:6px;font-weight:600;margin-bottom:4px}
+.header-title{font-size:48px;font-weight:900;color:#FFD700;text-shadow:2px 2px 14px rgba(0,0,0,0.5);font-family:Impact,'Arial Black',sans-serif;letter-spacing:2px}
+.header-countries{font-size:16px;color:rgba(255,255,255,0.85);margin-top:6px;font-weight:300}
+.header-stats{display:flex;justify-content:center;gap:40px;margin-top:16px}
+.header-stat-num{font-size:24px;font-weight:700;color:#FFD700}
+.header-stat-label{font-size:11px;color:rgba(255,255,255,0.6);text-transform:uppercase}
+.match-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);border-radius:6px;padding:8px 12px;margin-bottom:6px;border-left:3px solid #555}
+.match-row.live{border-left-color:#00ff88;background:rgba(0,255,136,0.08)}
+.match-row.finished{border-left-color:#888}
+.match-row.upcoming{border-left-color:#FFD700}
+.match-team{flex:1;font-size:13px;color:#eee;display:flex;align-items:center;gap:4px}
+.match-team.right{text-align:right;justify-content:flex-end}
+.match-score{font-size:18px;font-weight:700;color:#fff;padding:0 12px;text-align:center;min-width:70px}
+.match-status{font-size:10px;margin-left:10px;min-width:60px;text-align:right}
+.match-status.live{color:#00ff88;font-weight:700}
+.match-status.finished{color:#888}
+.match-status.upcoming{color:#FFD700}
+.flag{width:24px;height:16px;vertical-align:middle;display:inline-block}
+.upcoming-row{display:flex;align-items:center;background:rgba(255,255,255,0.03);border-radius:4px;padding:6px 10px;margin-bottom:4px}
+.upcoming-time{font-size:11px;color:#999;min-width:60px}
+.upcoming-group{font-size:11px;color:#ccc;min-width:30px}
+.upcoming-teams{flex:1;font-size:12px;color:#eee;display:flex;align-items:center;gap:4px}
+.upcoming-teams.right{text-align:right;justify-content:flex-end}
+.upcoming-vs{font-size:12px;color:#FFD700;padding:0 8px}
+table.standings{width:100%;border-collapse:collapse;font-size:11px}
+table.standings th{color:#888;padding:2px 0;text-align:center;font-weight:400}
+table.standings th.name{text-align:left;padding-left:4px}
+table.standings td{padding:2px 0;text-align:center}
+table.standings td.name{text-align:left;padding-left:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.standings .pos1{color:#006847;font-weight:700}
+table.standings .pos2{color:#0055aa;font-weight:600}
+table.standings .pos3,.standings .pos4{color:#ccc}
+.group-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.group-card{background:rgba(255,255,255,0.03);border-radius:6px;padding:10px;border:1px solid rgba(255,255,255,0.06)}
+.group-title{font-size:13px;font-weight:700;color:#FFD700;margin-bottom:8px;border-bottom:1px solid rgba(255,215,0,0.2);padding-bottom:6px}
+.bracket{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px}
+.bracket-col{min-width:200px;flex:1}
+.bracket-title{font-size:12px;font-weight:700;color:#FFD700;margin-bottom:8px;text-align:center;text-transform:uppercase}
+.bracket-match{background:rgba(255,255,255,0.03);border-radius:4px;padding:6px 8px;margin-bottom:4px;border-left:3px solid #555}
+.bracket-match.played{border-left-color:#00ff88}
+.team-list{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.team-card{background:rgba(255,255,255,0.03);border-radius:4px;padding:6px 8px}
+.team-card-title{font-size:10px;font-weight:700;color:#FFD700;margin-bottom:4px}
+.team-item{font-size:11px;color:#ccc;padding:1px 0;display:flex;align-items:center;gap:4px}
+.flag-sm{width:18px;height:12px}
+.flag-lg{width:48px;height:32px}
+.highlight-card{background:linear-gradient(135deg,#0d1117 0%,#1a1f2e 100%);border-radius:12px;padding:24px;text-align:center;border:2px solid rgba(255,215,0,0.3);margin-bottom:12px}
+.highlight-card.live{border-color:#00ff88}
+.highlight-badge{display:inline-block;background:#00ff88;color:#000;padding:2px 10px;border-radius:4px;font-size:11px;font-weight:700;margin-bottom:12px}
+.highlight-badge.next{background:transparent;color:#FFD700;font-size:13px}
+.highlight-teams{display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:12px}
+.highlight-team{text-align:center}
+.highlight-team-name{font-size:18px;font-weight:700;color:#fff;margin-top:4px}
+.highlight-score{font-size:48px;font-weight:900;color:#FFD700;min-width:120px}
+.calendar-wrap{max-height:350px;overflow-y:auto}
+.calendar-table{width:100%;border-collapse:collapse;font-size:11px}
+.calendar-table th{color:#888;padding:4px 6px;position:sticky;top:0;background:#0d1117;text-align:left;font-weight:400}
+.calendar-table td{padding:3px 6px;border-bottom:1px solid rgba(255,255,255,0.04);color:#ccc}
+.round-header{font-size:12px;font-weight:700;color:#aaa;margin-bottom:4px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:4px;margin-top:8px}
+.round-header:first-child{margin-top:0}
+.venues-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.venue-card{background:rgba(255,255,255,0.03);border-radius:6px;padding:8px;border:1px solid rgba(255,255,255,0.06)}
+.venue-title{font-size:12px;font-weight:700;color:#FFD700;margin-bottom:4px;border-bottom:1px solid rgba(255,215,0,0.2);padding-bottom:4px}
+.venue-count{font-size:10px;color:#888;margin-bottom:4px}
+.venue-match{font-size:10px;color:#ccc;padding:1px 0}
+.error{color:#ff4444;padding:10px;text-align:center}
+.loading{color:#888;padding:20px;text-align:center}
+.footer{text-align:center;font-size:11px;color:#555;margin-top:20px;padding:10px}
+.footer a{color:#FFD700;text-decoration:none}
+@keyframes blink{50%{opacity:0.3}}
+@media(max-width:900px){.row2{grid-template-columns:1fr}.row4{grid-template-columns:repeat(2,1fr)}.group-grid{grid-template-columns:repeat(2,1fr)}.venue-grid{grid-template-columns:repeat(2,1fr)}.team-list{grid-template-columns:repeat(2,1fr)}.header-stats{gap:16px}.header-title{font-size:32px}.highlight-score{font-size:32px}}
+@media(max-width:600px){.row4{grid-template-columns:1fr}.group-grid{grid-template-columns:1fr}.venue-grid{grid-template-columns:1fr}.team-list{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="header" id="wc_header2026">
+  <div class="header-2026">2026</div>
+  <div class="header-sub">FIFA World Cup</div>
+  <div class="header-title">2026</div>
+  <div class="header-countries">United States &bull; Mexico &bull; Canada</div>
+  <div class="header-stats">
+    <div><div class="header-stat-num">48</div><div class="header-stat-label">Teams</div></div>
+    <div><div class="header-stat-num">12</div><div class="header-stat-label">Groups</div></div>
+    <div><div class="header-stat-num">104</div><div class="header-stat-label">Matches</div></div>
+    <div><div class="header-stat-num">16</div><div class="header-stat-label">Cities</div></div>
+  </div>
+</div>
+
+<!-- Placar em Destaque -->
+<div id="wc_highlight"><div class="loading">Carregando...</div></div>
+
+<div class="grid row2">
+  <div class="card" id="wc_live_card">
+    <div class="card-title" id="wc_live_title">Jogos de Hoje</div>
+    <div id="wc_live"><div class="loading">Carregando...</div></div>
+  </div>
+  <div class="card" id="wc_upcoming_card">
+    <div class="card-title">Proximos Jogos</div>
+    <div id="wc_upcoming"><div class="loading">Carregando...</div></div>
+  </div>
+</div>
+
+<div class="card" id="wc_standings_card">
+  <div class="card-title">Classificacao dos Grupos</div>
+  <div id="wc_standings"><div class="loading">Carregando...</div></div>
+</div>
+
+<div class="card" id="wc_results_card">
+  <div class="card-title">Ultimos Resultados</div>
+  <div id="wc_results"><div class="loading">Carregando...</div></div>
+</div>
+
+<div class="card" id="wc_bracket_card">
+  <div class="card-title">Chaveamento - Mata-Mata</div>
+  <div id="wc_bracket"><div class="loading">Carregando...</div></div>
+</div>
+
+<div class="card" id="wc_calendar_card">
+  <div class="card-title">Calendario Completo (104 Jogos)</div>
+  <div id="wc_calendar"><div class="loading">Carregando...</div></div>
+</div>
+
+<div class="card" id="wc_rounds_card">
+  <div class="card-title">Jogos por Rodada</div>
+  <div id="wc_rounds"><div class="loading">Carregando...</div></div>
+</div>
+
+<div class="card" id="wc_venues_card">
+  <div class="card-title">Jogos por Estadio</div>
+  <div id="wc_venues"><div class="loading">Carregando...</div></div>
+</div>
+
+<div class="card" id="wc_teams_card">
+  <div class="card-title">Todos os Times</div>
+  <div id="wc_teams"><div class="loading">Carregando...</div></div>
+</div>
+
+<div class="footer">
+  Dados via <a href="https://wcup2026.org" target="_blank">wcup2026.org</a> &bull; Copa do Mundo 2026 &bull; Atualizado a cada 30s
+</div>
+
+<script>
+async function fetchAPI(action){
+  const r=await fetch('https://wcup2026.org/api/data.php?action='+action);
+  return r.json();
+}
+
+function fmtDate(ts){
+  const d=new Date(ts*1000);
+  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+}
+function fmtDateTime(ts){
+  const d=new Date(ts*1000);
+  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+function fmtTime(ts){
+  const d=new Date(ts*1000);
+  return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+function flag(url,size){
+  if(!url)return'';
+  const w=size||24,h=size?size*2/3:16;
+  return '<img src="'+url+'" style="width:'+w+'px;height:'+h+'px;vertical-align:middle;display:inline-block;"/>';
+}
+function isLive(m){return m.status==='live'}
+function isFinished(m){return m.status==='finished'}
+function isUpcoming(m){return m.status==='upcoming'}
+
+async function loadHighlight(){
+  const el=document.getElementById('wc_highlight');
+  try{
+    const d=await fetchAPI('all');
+    const now=Math.floor(Date.now()/1000);
+    const live=d.matches.filter(m=>isLive(m));
+    const upc=d.matches.filter(m=>isUpcoming(m)&&m.datetime>=now).sort((a,b)=>a.datetime-b.datetime);
+    const m=live.length>0?live[0]:(upc.length>0?upc[0]:null);
+    if(!m){el.innerHTML='<div class="loading">Nenhum jogo</div>';return}
+    const sc=m.score?m.score[0]+' - '+m.score[1]:'vs';
+    const dt=fmtDateTime(m.datetime);
+    const isL=isLive(m);
+    el.innerHTML='<div class="highlight-card'+(isL?' live':'')+'">'+
+      '<div class="'+(isL?'highlight-badge':'highlight-badge next')+'">'+(isL?'AO VIVO':'Proximo Jogo')+'</div>'+
+      '<div class="highlight-teams">'+
+        '<div class="highlight-team"><div>'+flag(m.flag1,48)+'</div><div class="highlight-team-name">'+m.team1+'</div></div>'+
+        '<div class="highlight-score">'+sc+'</div>'+
+        '<div class="highlight-team"><div>'+flag(m.flag2,48)+'</div><div class="highlight-team-name">'+m.team2+'</div></div>'+
+      '</div>'+
+      '<div style="font-size:13px;color:#aaa;margin-top:8px">'+dt+'</div>'+
+      (m.ground?'<div style="font-size:12px;color:#888">'+m.ground+'</div>':'')+
+      (isL&&m.live_minute?'<div style="font-size:16px;font-weight:700;color:#00ff88;margin-top:4px">'+m.live_minute+"'</div>":"")+
+    '</div>';
+  }catch(e){el.innerHTML='<div class="error">Erro ao carregar</div>'}
+}
+
+async function loadAoVivo(){
+  const el=document.getElementById('wc_live');
+  const titleEl=document.getElementById('wc_live_title');
+  try{
+    const d=await fetchAPI('all');
+    const now=Math.floor(Date.now()/1000);
+    const live=d.matches.filter(m=>isLive(m));
+    const today=d.matches.filter(m=>m.datetime>=now-86400&&m.datetime<=now+86400);
+    const show=live.length>0?live:today.slice(0,6);
+    const t=live.length>0?'AO VIVO':(today.length>0?'Jogos de Hoje':'Ultimos Jogos');
+    titleEl.textContent=t;
+    el.innerHTML=renderMatches(show);
+  }catch(e){el.innerHTML='<div class="error">Erro</div>'}
+}
+
+function renderMatches(matches){
+  let h='';
+  for(const m of matches){
+    const sc=m.score?m.score[0]+' - '+m.score[1]:'vs';
+    const cls=isLive(m)?'live':(isFinished(m)?'finished':'upcoming');
+    const lbl=isLive(m)?'AO VIVO':(isFinished(m)?'Encerrado':fmtTime(m.datetime));
+    h+='<div class="match-row '+cls+'">'+
+      '<div class="match-team">'+flag(m.flag1)+m.team1+'</div>'+
+      '<div class="match-score">'+sc+'</div>'+
+      '<div class="match-team right">'+m.team2+flag(m.flag2)+'</div>'+
+      '<div class="match-status '+cls+'">'+lbl+'</div></div>';
+  }
+  return '<div style="display:flex;flex-direction:column;gap:6px">'+h+'</div>';
+}
+
+async function loadUpcoming(){
+  const el=document.getElementById('wc_upcoming');
+  try{
+    const d=await fetchAPI('upcoming&limit=10');
+    let h='';
+    for(const m of d.matches){
+      h+='<div class="upcoming-row">'+
+        '<span class="upcoming-time">'+fmtDateTime(m.datetime)+'</span>'+
+        '<span class="upcoming-group">'+m.group.replace('Group ','')+'</span>'+
+        '<span class="upcoming-teams right">'+flag(m.flag1)+' '+m.team1+'</span>'+
+        '<span class="upcoming-vs">vs</span>'+
+        '<span class="upcoming-teams">'+m.team2+' '+flag(m.flag2)+'</span></div>';
+    }
+    el.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+h+'</div>';
+  }catch(e){el.innerHTML='<div class="error">Erro</div>'}
+}
+
+async function loadStandings(){
+  const el=document.getElementById('wc_standings');
+  try{
+    const d=await fetchAPI('standings');
+    const groups=d.standings||{};
+    const keys=Object.keys(groups).sort();
+    let h='<div class="group-grid">';
+    for(const gn of keys){
+      const ts=groups[gn];
+      h+='<div class="group-card"><div class="group-title">'+gn+'</div>'+
+        '<table class="standings"><tr><th class="name">Time</th><th>P</th><th>V</th><th>E</th><th>D</th><th>SG</th><th style="font-weight:700">Pts</th></tr>';
+      for(let t=0;t<ts.length;t++){
+        const tm=ts[t];
+        const pc=t===0?'pos1':(t===1?'pos2':'');
+        h+='<tr class="'+pc+'"><td class="name">'+tm.team+'</td><td>'+tm.p+'</td><td>'+tm.w+'</td><td>'+tm.d+'</td><td>'+tm.l+'</td><td>'+(tm.gd>0?'+':'')+tm.gd+'</td><td style="font-weight:700">'+tm.pts+'</td></tr>';
+      }
+      h+='</table></div>';
+    }
+    h+='</div>';
+    el.innerHTML=h;
+  }catch(e){el.innerHTML='<div class="error">Erro</div>'}
+}
+
+async function loadResults(){
+  const el=document.getElementById('wc_results');
+  try{
+    const d=await fetchAPI('results&limit=20');
+    el.innerHTML=renderMatches(d.matches);
+  }catch(e){el.innerHTML='<div class="error">Erro</div>'}
+}
+
+async function loadBracket(){
+  const el=document.getElementById('wc_bracket');
+  try{
+    const d=await fetchAPI('all');
+    const k=d.matches.filter(m=>m.round.indexOf('Round of')===0||m.round==='Quarter-finals'||m.round==='Semi-finals'||m.round==='Third-place'||m.round==='Final');
+    const rounds=['Round of 32','Round of 16','Quarter-finals','Semi-finals','Third-place','Final'];
+    let h='<div class="bracket">';
+    for(const rn of rounds){
+      const rm=k.filter(m=>m.round===rn);
+      if(!rm.length)continue;
+      h+='<div class="bracket-col"><div class="bracket-title">'+rn+'</div>';
+      for(const m of rm){
+        const sc=m.score?m.score[0]+'-'+m.score[1]:'?';
+        h+='<div class="bracket-match'+(isFinished(m)?' played':'')+'">'+
+          '<div style="font-size:10px;color:#888">'+m.team1+'</div>'+
+          '<div style="font-size:14px;font-weight:700;color:#FFD700;text-align:center">'+sc+'</div>'+
+          '<div style="font-size:10px;color:#888">'+m.team2+'</div>'+
+          (m.ground?'<div style="font-size:9px;color:#666;text-align:center;margin-top:2px">'+m.ground+'</div>':'')+
+        '</div>';
+      }
+      h+='</div>';
+    }
+    h+='</div>';
+    el.innerHTML=h;
+  }catch(e){el.innerHTML='<div class="error">Erro</div>'}
+}
+
+async function loadCalendar(){
+  const el=document.getElementById('wc_calendar');
+  try{
+    const d=await fetchAPI('all');
+    let h='<div class="calendar-wrap"><table class="calendar-table"><tr><th>Data</th><th>Fase</th><th>Grp</th><th style="text-align:right">Mandante</th><th style="text-align:center">Placar</th><th>Visitante</th><th>Estadio</th></tr>';
+    for(const m of d.matches){
+      const dt=fmtDate(m.datetime);
+      const sc=m.score?m.score[0]+'-'+m.score[1]:'vs';
+      const col=isLive(m)?'#00ff88':(isFinished(m)?'#888':'#FFD700');
+      const rd=m.round.replace('Matchday ','R');
+      h+='<tr><td style="white-space:nowrap">'+dt+'</td><td style="font-size:10px">'+rd+'</td><td style="font-size:10px">'+m.group.replace('Group ','')+'</td>'+
+        '<td style="text-align:right;white-space:nowrap">'+flag(m.flag1,16)+m.team1+'</td>'+
+        '<td style="text-align:center;font-weight:700;color:'+col+'">'+sc+'</td>'+
+        '<td style="white-space:nowrap">'+m.team2+flag(m.flag2,16)+'</td>'+
+        '<td style="font-size:10px;color:#888">'+m.ground+'</td></tr>';
+    }
+    h+='</table></div>';
+    el.innerHTML=h;
+  }catch(e){el.innerHTML='<div class="error">Erro</div>'}
+}
+
+async function loadRounds(){
+  const el=document.getElementById('wc_rounds');
+  try{
+    const d=await fetchAPI('all');
+    const groups={};const rounds=[];
+    for(const m of d.matches){
+      if(m.round.indexOf('Matchday')!==0)continue;
+      if(!groups[m.round]){groups[m.round]=[];rounds.push(m.round)}
+      groups[m.round].push(m);
+    }
+    rounds.sort();
+    let h='';
+    for(const rn of rounds){
+      const rm=groups[rn];
+      h+='<div class="round-header">'+rn.replace('Matchday ','Rodada ')+' ('+rm.length+' jogos)</div>';
+      for(const m of rm){
+        const dt=fmtDate(m.datetime);
+        const sc=m.score?m.score[0]+'-'+m.score[1]:'vs';
+        const col=isLive(m)?'#00ff88':(isFinished(m)?'#888':'#FFD700');
+        h+='<div class="upcoming-row"><span style="color:#888;min-width:50px;font-size:11px">'+dt+'</span>'+
+          '<span style="color:#999;min-width:22px;font-size:10px">'+m.group.replace('Group ','')+'</span>'+
+          '<span class="upcoming-teams right">'+flag(m.flag1,16)+m.team1+'</span>'+
+          '<span style="font-weight:700;color:'+col+';min-width:30px;text-align:center;padding:0 6px">'+sc+'</span>'+
+          '<span class="upcoming-teams">'+m.team2+flag(m.flag2,16)+'</span></div>';
+      }
+    }
+    el.innerHTML='<div style="max-height:400px;overflow-y:auto">'+h+'</div>';
+  }catch(e){el.innerHTML='<div class="error">Erro</div>'}
+}
+
+async function loadVenues(){
+  const el=document.getElementById('wc_venues');
+  try{
+    const d=await fetchAPI('all');
+    const v={};
+    for(const m of d.matches){
+      if(!m.ground)continue;
+      if(!v[m.ground])v[m.ground]=[];
+      v[m.ground].push(m);
+    }
+    const names=Object.keys(v).sort();
+    let h='<div class="venues-grid">';
+    for(const vn of names){
+      const vm=v[vn];
+      h+='<div class="venue-card"><div class="venue-title">'+vn+'</div><div class="venue-count">'+vm.length+' jogos</div>';
+      for(let mi=0;mi<vm.length&&mi<5;mi++){
+        const m=vm[mi];const dt=fmtDate(m.datetime);
+        h+='<div class="venue-match"><span style="color:#888">'+dt+'</span> '+m.team1+' '+(m.score?m.score[0]+'-'+m.score[1]:'vs')+' '+m.team2+'</div>';
+      }
+      if(vm.length>5)h+='<div style="font-size:10px;color:#666">+ '+(vm.length-5)+' mais</div>';
+      h+='</div>';
+    }
+    h+='</div>';
+    el.innerHTML=h;
+  }catch(e){el.innerHTML='<div class="error">Erro</div>'}
+}
+
+async function loadTeams(){
+  const el=document.getElementById('wc_teams');
+  try{
+    const d=await fetchAPI('all');
+    const tm={};
+    for(const m of d.matches){
+      if(m.team1&&m.flag1&&!tm[m.team1])tm[m.team1]={name:m.team1,flag:m.flag1,group:m.group};
+      if(m.team2&&m.flag2&&!tm[m.team2])tm[m.team2]={name:m.team2,flag:m.flag2,group:m.group};
+    }
+    const teams=Object.keys(tm).sort().map(k=>tm[k]);
+    const groups={};
+    for(const t of teams){
+      const g=t.group||'KO';
+      if(!groups[g])groups[g]=[];
+      groups[g].push(t);
+    }
+    const gKeys=Object.keys(groups).sort();
+    let h='<div class="team-list">';
+    for(const gk of gKeys){
+      if(gk==='KO')continue;
+      const gts=groups[gk];
+      h+='<div class="team-card"><div class="team-card-title">'+gk+'</div>';
+      for(const t of gts){
+        h+='<div class="team-item"><img src="'+t.flag+'" class="flag-sm"/> '+t.name+'</div>';
+      }
+      h+='</div>';
+    }
+    h+='</div>';
+    el.innerHTML=h;
+  }catch(e){el.innerHTML='<div class="error">Erro</div>'}
+}
+
+async function loadAll(){
+  await Promise.all([
+    loadHighlight(),loadAoVivo(),loadUpcoming(),loadStandings(),
+    loadResults(),loadBracket(),loadCalendar(),loadRounds(),
+    loadVenues(),loadTeams()
+  ]);
+}
+
+loadAll();
+setInterval(loadAll,30000);
+</script>
+</body>
+</html>
